@@ -26,6 +26,13 @@ class _SendSmsState extends State<SendSms> {
       var mi = Permission.sms;
       if (await mi.isDenied) {
         log("Permission Denied");
+        await Permission.sms.request();
+        final String result = await platform.invokeMethod(
+            'send', <String, dynamic>{
+          "phone": "+2348090650781",
+          "msg": "Hello! I'm sent programatically."
+        }); //Replace a 'X' with 10 digit phone number
+        print(result);
       } else {
         await Permission.sms.request();
         if (await mi.isGranted) {
