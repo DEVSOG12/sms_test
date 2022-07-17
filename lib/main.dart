@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/material.dart';
@@ -6,22 +8,22 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 void main() {
-  runApp(new MaterialApp(
+  runApp(MaterialApp(
     title: "Rotation Demo",
-    home: new SendSms(),
+    home: SendSms(),
   ));
 }
 
 class SendSms extends StatefulWidget {
   @override
-  _SendSmsState createState() => new _SendSmsState();
+  _SendSmsState createState() => _SendSmsState();
 }
 
 class _SendSmsState extends State<SendSms> {
-  static const platform = const MethodChannel('sendSms');
+  static const platform = MethodChannel('sendSms');
 
-  Future<Null> sendSms() async {
-    print("SendSMS");
+  Future<Null> sendSms({String? number, String? msg}) async {
+    log("SendSMS");
     try {
       var mi = Permission.sms;
       if (await mi.isDenied) {
@@ -29,33 +31,45 @@ class _SendSmsState extends State<SendSms> {
         await Permission.sms.request();
         final String result = await platform.invokeMethod(
             'send', <String, dynamic>{
-          "phone": "+2348090650781",
+          "phone": number,
           "msg": "Hello! I'm sent programatically."
         }); //Replace a 'X' with 10 digit phone number
-        print(result);
+        log(result);
       } else {
         await Permission.sms.request();
         if (await mi.isGranted) {
           final String result = await platform.invokeMethod(
               'send', <String, dynamic>{
-            "phone": "+2348090650781",
-            "msg": "Hello! I'm sent programatically."
+            "phone": number,
+            "msg": msg
           }); //Replace a 'X' with 10 digit phone number
-          print(result);
+          log(result);
         }
       }
     } on PlatformException catch (e) {
-      print(e.toString());
+      log(e.toString());
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Material(
-      child: new Container(
+    return Material(
+      child: Container(
         alignment: Alignment.center,
-        child: new FlatButton(
-            onPressed: () => sendSms(), child: const Text("Send SMS")),
+        child: FlatButton(
+            onPressed: () {
+              List<String> numbers = [
+                "+2348090650781",
+                "+2348090650782",
+                "+2348090650783"
+              ];
+
+              for (var number in numbers) {
+                sendSms(
+                    number: number, msg: "This is ${numbers.indexOf(number)}");
+              }
+            },
+            child: const Text("Send SMS")),
       ),
     );
   }
